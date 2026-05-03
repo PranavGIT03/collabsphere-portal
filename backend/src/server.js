@@ -51,7 +51,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 
 // ── Serve built frontend ──────────────────────────────────
-const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+const frontendDist = path.join(__dirname, '..', 'public');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   app.get('/{*path}', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));

@@ -4,7 +4,10 @@
     {
       "src": "backend/src/server.js",
       "use": "@vercel/node",
-      "config": { "includeFiles": ["frontend/dist/**"], "maxDuration": 30 }
+      "config": {
+        "includeFiles": ["backend/public/**"],
+        "maxDuration": 30
+      }
     }
   ],
   "routes": [
