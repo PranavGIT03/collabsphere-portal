@@ -51,6 +51,39 @@ const calcCompletion = (profile) => {
   return Math.round(checks.filter(Boolean).length / checks.length * 100);
 };
 
+// ── Faculty dropdown options ──────────────────────────────
+const FACULTY_DOMAINS = [
+  'Artificial Intelligence & Machine Learning',
+  'Data Science & Analytics',
+  'Computer Vision & Image Processing',
+  'Natural Language Processing',
+  'Quantum Computing',
+  'Cybersecurity & Networks',
+  'Software Engineering & DevOps',
+  'Database Systems & Cloud Computing',
+  'Computer Architecture & VLSI',
+  'Robotics & Autonomous Systems',
+  'Signal Processing & Communications',
+  'Electronics & Embedded Systems',
+  'Mechanical Engineering',
+  'Civil & Structural Engineering',
+  'Mathematics & Statistics',
+  'Bioinformatics & Healthcare AI',
+  'Human-Computer Interaction',
+  'Other',
+];
+
+const FACULTY_POSITIONS = [
+  'Professor',
+  'Associate Professor',
+  'Assistant Professor',
+  'Visiting Professor',
+  'Adjunct Faculty',
+  'Research Scientist',
+  'Lecturer',
+  'Head of Department',
+];
+
 // ── Email format validators ───────────────────────────────
 const STUDENT_EMAIL_RE = /^[a-z]{2}[0-9]{2}[a-z]+[0-9]{3}@mahindrauniversity\.edu\.in$/i;
 const FACULTY_EMAIL_RE = /^[a-z]+\.[a-z]+\.faculty@mahindrauniversity\.edu\.in$/i;
@@ -554,11 +587,15 @@ export default function App() {
               {authForm.role === 'faculty' && <>
                 <div className="form-grid">
                   <div className="field"><label>Domain / expertise</label>
-                    <input placeholder="Machine Learning" value={authForm.domain}
-                      onChange={e => setAuthForm(p => ({ ...p, domain: e.target.value }))} /></div>
+                    <select value={authForm.domain} onChange={e => setAuthForm(p => ({ ...p, domain: e.target.value }))}>
+                      <option value="">Select domain…</option>
+                      {FACULTY_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select></div>
                   <div className="field"><label>Position / designation</label>
-                    <input placeholder="Associate Professor" value={authForm.position}
-                      onChange={e => setAuthForm(p => ({ ...p, position: e.target.value }))} /></div>
+                    <select value={authForm.position} onChange={e => setAuthForm(p => ({ ...p, position: e.target.value }))}>
+                      <option value="">Select position…</option>
+                      {FACULTY_POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select></div>
                 </div>
               </>}
               <button className="btn btn-primary btn-full" type="submit" disabled={loading} style={{ marginTop: '.25rem' }}>
