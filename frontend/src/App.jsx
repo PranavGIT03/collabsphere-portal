@@ -1631,7 +1631,7 @@ export default function App() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">CS</div>
+          <img src="/collabsphere.svg" alt="CollabSphere" style={{ width: 36, height: 36, flexShrink: 0 }} />
           <div className="sidebar-logo-text">
             CollabSphere
             <small>Campus Platform</small>
