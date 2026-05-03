@@ -1,27 +1,26 @@
 const mongoose = require('mongoose');
 
-// Cache connection across serverless invocations
-let isConnected = false;
+mongoose.set('bufferCommands', false); // fail immediately instead of buffering
+
+let connectionPromise = null;
 
 const connectDB = async () => {
-  if (isConnected && mongoose.connection.readyState === 1) return;
+  if (mongoose.connection.readyState === 1) return;
 
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000,
-      connectTimeoutMS: 8000,
-      socketTimeoutMS: 30000,
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+    }).then(async () => {
+      console.log('MongoDB connected');
+      await seedAdmin();
+    }).catch((err) => {
+      connectionPromise = null; // allow retry on next request
+      throw err;
     });
-    isConnected = true;
-    console.log('MongoDB connected');
-    await seedAdmin();
-  } catch (error) {
-    console.error('MongoDB connection error:', error.message);
-    if (!process.env.VERCEL) {
-      console.error('Retrying in 10 seconds...');
-      setTimeout(connectDB, 10_000);
-    }
   }
+
+  await connectionPromise;
 };
 
 const seedAdmin = async () => {
