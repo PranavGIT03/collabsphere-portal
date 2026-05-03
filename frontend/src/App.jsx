@@ -1084,10 +1084,12 @@ export default function App() {
   const renderProjectDetail = () => {
     const p = selectedProject;
     if (!p) return null;
-    const applied = (p.applications || []).some(a => {
+    const myApp = (p.applications || []).find(a => {
       const sid = a.student?._id || a.student;
       return sid?.toString() === user?.id?.toString();
     });
+    const applied = !!myApp;
+    const accepted = myApp?.status === 'accepted';
     return (
       <div className="detail-panel">
         <button className="detail-back" onClick={() => setSelectedProject(null)}>
@@ -1139,7 +1141,7 @@ export default function App() {
                 </div>
               : <button className="btn btn-primary" onClick={() => setApplyOpen(true)}>Apply to this project</button>
             )}
-            {p.professor?._id && (
+            {p.professor?._id && accepted && (
               <button className="btn btn-ghost btn-sm" onClick={() => openChat({ _id: p.professor._id, name: p.professor.name, role: p.professor.role || 'faculty' })}>
                 <Icon name="message" size={14} /> Message professor
               </button>
@@ -1352,7 +1354,7 @@ export default function App() {
                                     <button className="btn btn-sm" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }} disabled={loading} onClick={() => doReview(p._id, app._id, 'shortlist')}>Shortlist</button>
                                     <button className="btn btn-sm btn-sage" disabled={loading} onClick={() => doReview(p._id, app._id, 'accept')}>Select</button>
                                     <button className="btn btn-sm btn-danger" disabled={loading} onClick={() => doReview(p._id, app._id, 'decline')}>Reject</button>
-                                    {stu._id && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
+                                    {stu._id && app.status === 'accepted' && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
                                   </div>
                                 </div>
                               </div>
@@ -1379,8 +1381,8 @@ export default function App() {
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {conversations.length === 0 && (
-            <p style={{ padding: '1.25rem 1rem', fontSize: '.82rem', color: 'var(--text-muted)' }}>
-              No conversations yet. Start one from a project or applicant.
+            <p style={{ padding: '1.25rem 1rem', fontSize: '.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              No conversations yet.{isFaculty ? ' Chat buttons appear on applicant cards once you select a student.' : ' Chat opens on a project page once your application is accepted.'}
             </p>
           )}
           {conversations.map(c => (
@@ -1411,7 +1413,7 @@ export default function App() {
       {!chatTarget
         ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '.9rem', padding: '2rem', textAlign: 'center' }}>
-            Select a conversation, or open one from a project page or applicant list.
+            Select a conversation from the left, or start one after an application is accepted.
           </div>
         ) : (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>

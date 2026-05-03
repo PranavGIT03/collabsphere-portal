@@ -4,6 +4,7 @@ const {
   updateMyProfile,
   uploadResume,
   listFacultyProfiles,
+  listStudentProfiles,
   toggleFollowProfessor,
 } = require('../controllers/profileController');
 const { protect } = require('../middleware/authMiddleware');

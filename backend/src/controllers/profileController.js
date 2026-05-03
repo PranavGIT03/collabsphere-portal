@@ -128,6 +128,17 @@ const listFacultyProfiles = async (req, res, next) => {
   }
 };
 
+const listStudentProfiles = async (req, res, next) => {
+  try {
+    const students = await User.find({ role: { $in: ['student', 'alumni'] } })
+      .select('name role rollNumber branch year department')
+      .sort({ name: 1 }).lean();
+    return res.status(200).json(students);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const toggleFollowProfessor = async (req, res, next) => {
   try {
     const target = await User.findById(req.params.facultyId);
@@ -147,4 +158,4 @@ const toggleFollowProfessor = async (req, res, next) => {
   }
 };
 
-module.exports = { getMyProfile, updateMyProfile, uploadResume, listFacultyProfiles, toggleFollowProfessor };
+module.exports = { getMyProfile, updateMyProfile, uploadResume, listFacultyProfiles, listStudentProfiles, toggleFollowProfessor };
