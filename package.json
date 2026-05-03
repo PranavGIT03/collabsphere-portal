@@ -2,9 +2,9 @@
   "name": "collabsphere",
   "version": "1.0.0",
   "scripts": {
-    "vercel-build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install",
-    "build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install",
-    "start": "npm --prefix backend start"
+    "vercel-build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci",
+    "build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci",
+    "start": "cd backend && node src/server.js"
   },
   "engines": {
     "node": ">=20.0.0"
