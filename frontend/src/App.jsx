@@ -1089,7 +1089,6 @@ export default function App() {
       return sid?.toString() === user?.id?.toString();
     });
     const applied = !!myApp;
-    const accepted = myApp?.status === 'accepted';
     return (
       <div className="detail-panel">
         <button className="detail-back" onClick={() => setSelectedProject(null)}>
@@ -1382,8 +1381,10 @@ export default function App() {
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {conversations.length === 0 && (
-            <p style={{ padding: '1.25rem 1rem', fontSize: '.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              No conversations yet.{isFaculty ? ' Chat buttons appear on applicant cards once you select a student.' : ' Chat opens on a project page once your application is accepted.'}
+            <p style={{ padding: '1.25rem 1rem', fontSize: '.82rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              {isFaculty
+                ? 'No conversations yet. Chat buttons appear on applicant cards once you select a student.'
+                : 'Messages will appear here once your application is accepted by the respective professor.'}
             </p>
           )}
           {conversations.map(c => (
