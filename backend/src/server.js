@@ -11,6 +11,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const evaluationRoutes = require('./routes/evaluationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/messages', messageRoutes);
 
 // ── Serve built frontend ──────────────────────────────────
 const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');

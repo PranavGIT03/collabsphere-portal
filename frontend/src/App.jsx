@@ -15,6 +15,8 @@ const ICONS = {
   projects:  <><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></>,
   apps:      <><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h7"/></>,
   bulletin:  <><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></>,
+  message:   <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>,
+  send:      <><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>,
   profile:   <><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
   post:      <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
   users:     <><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>,
@@ -41,6 +43,7 @@ const BULLETIN_CLS   = { announcement: 'badge-rose', deadline: 'badge-amber', no
 const ROLE_LABEL = { student: 'Student', faculty: 'Faculty', alumni: 'Alumni', admin: 'Admin' };
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+const fmtTime = (d) => d ? new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '';
 const initials = (name = '') => name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 const splitCSV = (v) => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -169,6 +172,14 @@ export default function App() {
 
   const resumeRef = useRef(null);
   const attachRef = useRef(null);
+  const chatScrollRef = useRef(null);
+
+  // ── Chat state ────────────────────────────────────────────
+  const [conversations, setConversations]   = useState([]);
+  const [chatTarget, setChatTarget]         = useState(null);
+  const [chatThread, setChatThread]         = useState([]);
+  const [chatInput, setChatInput]           = useState('');
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
 
   const isFaculty = user?.role === 'faculty';
   const isStudent = user?.role === 'student' || user?.role === 'alumni';
@@ -246,6 +257,71 @@ export default function App() {
       console.error('Admin load error', e);
     }
   }, [api, token]);
+
+  // ── Chat helpers ──────────────────────────────────────────
+  const loadConversations = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await api('/messages/conversations');
+      setConversations(data || []);
+      setUnreadMsgCount((data || []).reduce((s, c) => s + c.unread, 0));
+    } catch {}
+  }, [api, token]);
+
+  const loadThread = useCallback(async (userId) => {
+    if (!userId) return;
+    try {
+      const data = await api(`/messages/thread/${userId}`);
+      setChatThread(data || []);
+      setConversations(prev =>
+        prev.map(c => c.user._id === userId ? { ...c, unread: 0 } : c)
+      );
+      setUnreadMsgCount(prev => Math.max(0, prev));
+    } catch {}
+  }, [api]);
+
+  const sendChatMessage = useCallback(async () => {
+    if (!chatInput.trim() || !chatTarget) return;
+    const content = chatInput.trim();
+    setChatInput('');
+    try {
+      const msg = await api(`/messages/thread/${chatTarget._id}`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      });
+      setChatThread(prev => [...prev, msg]);
+    } catch (e) { showToast(e.message, 'error'); }
+  }, [api, chatInput, chatTarget, showToast]);
+
+  const openChat = useCallback((targetUser) => {
+    setChatTarget(targetUser);
+    setChatThread([]);
+    setView('messages');
+    setSidebarOpen(false);
+  }, []);
+
+  // Poll conversations (global unread badge) every 15s when logged in
+  useEffect(() => {
+    if (!token) return;
+    loadConversations();
+    const id = setInterval(loadConversations, 15000);
+    return () => clearInterval(id);
+  }, [token, loadConversations]);
+
+  // Poll thread every 3s when messages view is active and a target is selected
+  useEffect(() => {
+    if (view !== 'messages' || !chatTarget) return;
+    loadThread(chatTarget._id);
+    const id = setInterval(() => loadThread(chatTarget._id), 3000);
+    return () => clearInterval(id);
+  }, [view, chatTarget, loadThread]);
+
+  // Scroll to bottom when thread updates
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatThread]);
 
   // Bootstrap
   useEffect(() => {
@@ -668,12 +744,14 @@ export default function App() {
     { key: 'dashboard',    label: 'Dashboard',     icon: 'dashboard' },
     { key: 'post-project', label: 'Post Project',  icon: 'post' },
     { key: 'my-projects',  label: 'My Projects',   icon: 'projects' },
+    { key: 'messages',     label: 'Messages',      icon: 'message' },
     { key: 'bulletin',     label: 'Bulletin Board', icon: 'bulletin' },
     { key: 'profile',      label: 'My Profile',    icon: 'profile' },
   ] : [
     { key: 'dashboard',    label: 'Dashboard',     icon: 'dashboard' },
     { key: 'projects',     label: 'Browse Projects', icon: 'projects' },
     { key: 'applications', label: 'My Applications', icon: 'apps' },
+    { key: 'messages',     label: 'Messages',      icon: 'message' },
     { key: 'bulletin',     label: 'Bulletin Board', icon: 'bulletin' },
     { key: 'profile',      label: 'My Profile',    icon: 'profile' },
   ];
@@ -1053,13 +1131,19 @@ export default function App() {
 
         {p.attachmentUrl && <><div className="divider" /><a href={p.attachmentUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">Open attachment</a></>}
 
-        {isStudent && p.status === 'open' && (
-          <div style={{ marginTop: '1.25rem' }}>
-            {applied
+        {isStudent && (
+          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {p.status === 'open' && (applied
               ? <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)', padding: '.75rem 1rem', color: '#15803d', fontWeight: 600, display: 'flex', gap: '.5rem', alignItems: 'center' }}>
                   <Icon name="check" size={16} /> You have already applied to this project
                 </div>
-              : <button className="btn btn-primary" onClick={() => setApplyOpen(true)}>Apply to this project</button>}
+              : <button className="btn btn-primary" onClick={() => setApplyOpen(true)}>Apply to this project</button>
+            )}
+            {p.professor?._id && (
+              <button className="btn btn-ghost btn-sm" onClick={() => openChat({ _id: p.professor._id, name: p.professor.name, role: p.professor.role || 'faculty' })}>
+                <Icon name="message" size={14} /> Message professor
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -1268,6 +1352,7 @@ export default function App() {
                                     <button className="btn btn-sm" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }} disabled={loading} onClick={() => doReview(p._id, app._id, 'shortlist')}>Shortlist</button>
                                     <button className="btn btn-sm btn-sage" disabled={loading} onClick={() => doReview(p._id, app._id, 'accept')}>Select</button>
                                     <button className="btn btn-sm btn-danger" disabled={loading} onClick={() => doReview(p._id, app._id, 'decline')}>Reject</button>
+                                    {stu._id && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
                                   </div>
                                 </div>
                               </div>
@@ -1280,6 +1365,108 @@ export default function App() {
             ))}
           </div>}
     </>
+  );
+
+  // ════════════════════════════════════════════════════════
+  // RENDER: MESSAGES (Faculty ↔ Student)
+  // ════════════════════════════════════════════════════════
+  const renderMessages = () => (
+    <div style={{ display: 'flex', height: 'calc(100vh - 9rem)', gap: 0, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--surface-1)' }}>
+      {/* Left: conversation list */}
+      <div style={{ width: 260, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ padding: '.85rem 1rem', fontWeight: 700, fontSize: '.875rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+          Conversations
+        </div>
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {conversations.length === 0 && (
+            <p style={{ padding: '1.25rem 1rem', fontSize: '.82rem', color: 'var(--text-muted)' }}>
+              No conversations yet. Start one from a project or applicant.
+            </p>
+          )}
+          {conversations.map(c => (
+            <div key={c.user._id}
+              onClick={() => setChatTarget(c.user)}
+              style={{
+                padding: '.7rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '.65rem',
+                background: chatTarget?._id === c.user._id ? 'var(--rose-50, #fff2f4)' : 'transparent',
+                borderBottom: '1px solid var(--border)',
+                transition: 'background .15s',
+              }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--rose)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.8rem', fontWeight: 700, flexShrink: 0 }}>
+                {initials(c.user.name)}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.user.name}</div>
+                <div style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>{ROLE_LABEL[c.user.role] || c.user.role}</div>
+              </div>
+              {c.unread > 0 && (
+                <span style={{ background: 'var(--rose)', color: '#fff', borderRadius: '999px', fontSize: '.65rem', padding: '0 .42rem', fontWeight: 700, lineHeight: '1.6' }}>{c.unread}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Right: thread */}
+      {!chatTarget
+        ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '.9rem', padding: '2rem', textAlign: 'center' }}>
+            Select a conversation, or open one from a project page or applicant list.
+          </div>
+        ) : (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            {/* Thread header */}
+            <div style={{ padding: '.7rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '.65rem', background: 'var(--surface-2)', flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--rose)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.8rem', fontWeight: 700 }}>
+                {initials(chatTarget.name)}
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '.9rem' }}>{chatTarget.name}</div>
+                <div style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>{ROLE_LABEL[chatTarget.role] || chatTarget.role}</div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div ref={chatScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.45rem' }}>
+              {chatThread.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '2rem', fontSize: '.85rem' }}>No messages yet — say hello!</p>
+              )}
+              {chatThread.map(msg => {
+                const mine = (msg.sender?._id || msg.sender)?.toString() === user?.id?.toString();
+                return (
+                  <div key={msg._id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
+                    <div style={{
+                      maxWidth: '68%', padding: '.5rem .85rem',
+                      borderRadius: mine ? '1.1rem 1.1rem .25rem 1.1rem' : '1.1rem 1.1rem 1.1rem .25rem',
+                      background: mine ? 'var(--rose)' : 'var(--surface-2)',
+                      color: mine ? '#fff' : 'var(--text)',
+                      fontSize: '.875rem', lineHeight: 1.55,
+                      border: mine ? 'none' : '1px solid var(--border)',
+                    }}>
+                      {msg.content}
+                      <div style={{ fontSize: '.67rem', opacity: 0.65, marginTop: '.2rem', textAlign: 'right' }}>{fmtTime(msg.createdAt)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Input */}
+            <div style={{ padding: '.75rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '.5rem', background: 'var(--surface-2)', flexShrink: 0 }}>
+              <input
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }}
+                placeholder="Type a message…"
+                style={{ flex: 1, padding: '.6rem .9rem', border: '1px solid var(--border-mid)', borderRadius: 'var(--radius-sm)', fontSize: '.875rem', background: 'var(--surface-1)', color: 'var(--text)', outline: 'none' }}
+              />
+              <button className="btn btn-primary btn-sm" onClick={sendChatMessage} disabled={!chatInput.trim()}>
+                <Icon name="send" size={15} />
+              </button>
+            </div>
+          </div>
+        )}
+    </div>
   );
 
   // ════════════════════════════════════════════════════════
@@ -1643,6 +1830,9 @@ export default function App() {
             <button key={item.key} className={`nav-item ${view === item.key ? 'active' : ''}`} onClick={() => nav(item.key)}>
               <Icon name={item.icon} size={17} />
               {item.label}
+              {item.key === 'messages' && unreadMsgCount > 0 && (
+                <span style={{ marginLeft: 'auto', background: 'var(--rose)', color: '#fff', borderRadius: '999px', fontSize: '.65rem', padding: '0 .42rem', fontWeight: 700, lineHeight: '1.6' }}>{unreadMsgCount}</span>
+              )}
             </button>
           ))}
         </nav>
@@ -1687,6 +1877,7 @@ export default function App() {
           {view === 'my-projects'  && isFaculty && renderMyProjects()}
           {view === 'users'        && isAdmin   && renderUsers()}
           {view === 'all-projects' && isAdmin   && renderAllProjects()}
+          {view === 'messages'     && !isAdmin  && renderMessages()}
           {view === 'bulletin'     && renderBulletin()}
           {view === 'profile'      && !isAdmin  && renderProfile()}
         </div>
