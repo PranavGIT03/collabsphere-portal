@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Globe wireframe: great-circle arcs at 22.5° intervals -->
+  <g fill="none" stroke="#111" stroke-linecap="round">
+    <circle cx="100" cy="100" r="76" stroke-width="3.5"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(0   100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(22.5 100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(45  100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(67.5 100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(90  100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(112.5 100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(135 100 100)"/>
+    <ellipse cx="100" cy="100" rx="28" ry="76" stroke-width="2.2" transform="rotate(157.5 100 100)"/>
+    <ellipse cx="100" cy="100" rx="76" ry="23" stroke-width="2" transform="rotate(8 100 100)"/>
+  </g>
+
+  <!-- Red orbital swoosh -->
+  <ellipse cx="100" cy="100" rx="95" ry="30"
+    fill="none" stroke="#c0364b" stroke-width="8.5" stroke-linecap="round"
+    transform="rotate(-13 100 100)"/>
+  <polygon points="168,62 184,48 177,70" fill="#c0364b"/>
+
+  <!-- Red network nodes -->
+  <g stroke="#c0364b" stroke-width="2.8" stroke-linecap="round">
+    <line x1="87" y1="51" x2="112" y2="45"/>
+    <line x1="112" y1="45" x2="133" y2="59"/>
+    <line x1="87"  y1="51" x2="67"  y2="66"/>
+    <line x1="87"  y1="51" x2="133" y2="59"/>
+    <line x1="112" y1="45" x2="67"  y2="66"/>
+  </g>
+  <g fill="#c0364b">
+    <circle cx="87"  cy="51" r="5.5"/>
+    <circle cx="112" cy="45" r="5.5"/>
+    <circle cx="133" cy="59" r="5.5"/>
+    <circle cx="67"  cy="66" r="5.5"/>
+  </g>
+
+  <!-- Student silhouette (left, graduation cap) -->
+  <g fill="#111">
+    <rect x="62" y="87" width="26" height="5" rx="1.2" transform="rotate(-4 75 89)"/>
+    <rect x="66" y="79" width="18" height="9" rx="2" transform="rotate(-4 75 83)"/>
+    <line x1="87" y1="87" x2="91" y2="98" stroke="#111" stroke-width="2"/>
+    <ellipse cx="76" cy="101" rx="9.5" ry="10.5"/>
+    <path d="M64,111 C61,116 62,131 70,136 C76,134 83,128 86,121 C89,114 88,111 86,111 Z"/>
+    <path d="M85,117 C90,118 99,120 104,123 C105,125 104,128 102,127 C97,125 90,123 86,121 Z"/>
+    <path d="M64,113 C59,115 56,120 57,124 C58,128 62,127 64,124 C66,120 65,116 64,113 Z"/>
+    <rect x="49" y="119" width="11" height="16" rx="3" transform="rotate(-18 54 127)"/>
+  </g>
+
+  <!-- Professor silhouette (right, suit) -->
+  <g fill="#111">
+    <ellipse cx="123" cy="96" rx="10.5" ry="12"/>
+    <path d="M110,109 C108,117 109,136 123,140 C137,136 138,117 136,109 L131,109 L123,117 L115,109 Z"/>
+    <path d="M123,117 L115,111 L113,130 L121,127 Z" fill="#1d1d1d"/>
+    <path d="M123,117 L131,111 L133,130 L125,127 Z" fill="#1d1d1d"/>
+    <path d="M110,115 C104,117 99,120 95,123 C94,126 95,129 98,128 C103,126 109,122 114,119 Z"/>
+    <rect x="119" y="107" width="8" height="5" rx="1.2" fill="#222"/>
+  </g>
+</svg>
