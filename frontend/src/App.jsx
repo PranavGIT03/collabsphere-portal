@@ -164,6 +164,8 @@ export default function App() {
   const [bulletinForm, setBulletinForm] = useState(INIT_BULLETIN);
   const [reviewData, setReviewData]   = useState({}); // { appId: { remarks } }
   const [evalForms, setEvalForms]     = useState({});
+  const [commentInputs, setCommentInputs]     = useState({}); // { postId: string }
+  const [expandedComments, setExpandedComments] = useState({}); // { postId: bool }
 
   const resumeRef = useRef(null);
   const attachRef = useRef(null);
@@ -424,6 +426,16 @@ export default function App() {
       showToast('Post deleted', 'success');
     } catch (e) { showToast(e.message, 'error'); }
     finally { setLoading(false); }
+  };
+
+  const doAddComment = async (postId) => {
+    const content = (commentInputs[postId] || '').trim();
+    if (!content) return;
+    try {
+      await api(`/posts/${postId}/comments`, { method: 'POST', body: JSON.stringify({ content }) });
+      setCommentInputs(p => ({ ...p, [postId]: '' }));
+      await (isAdmin ? loadAdminData() : loadData());
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   const doFollowToggle = async (facultyId) => {
@@ -1327,6 +1339,44 @@ export default function App() {
                 </div>
                 <div className="bulletin-content">{b.content}</div>
                 <div style={{ fontSize: '.74rem', color: 'var(--text-muted)', marginTop: '.5rem' }}>Posted by {b.author?.name} ({ROLE_LABEL[b.author?.role] || b.author?.role})</div>
+
+                {/* Comments section */}
+                <div style={{ marginTop: '.85rem', borderTop: '1px solid var(--border)', paddingTop: '.75rem' }}>
+                  <button
+                    className="btn btn-sm btn-ghost"
+                    style={{ fontSize: '.78rem', padding: '.2rem .5rem', marginBottom: '.6rem' }}
+                    onClick={() => setExpandedComments(p => ({ ...p, [b._id]: !p[b._id] }))}>
+                    {expandedComments[b._id] ? 'Hide' : 'Show'} comments ({b.comments?.length || 0})
+                  </button>
+
+                  {expandedComments[b._id] && (
+                    <>
+                      {b.comments?.length > 0
+                        ? <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', marginBottom: '.75rem' }}>
+                            {b.comments.map(c => (
+                              <div key={c._id} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '.5rem .75rem', fontSize: '.84rem' }}>
+                                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{c.author?.name}</span>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '.75rem', marginLeft: '.4rem' }}>{fmtDate(c.createdAt)}</span>
+                                <div style={{ color: 'var(--text-soft)', marginTop: '.2rem' }}>{c.content}</div>
+                              </div>
+                            ))}
+                          </div>
+                        : <p style={{ fontSize: '.8rem', color: 'var(--text-muted)', marginBottom: '.6rem' }}>No comments yet. Be the first!</p>}
+
+                      <div style={{ display: 'flex', gap: '.5rem' }}>
+                        <input
+                          style={{ flex: 1, fontSize: '.85rem', padding: '.4rem .65rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontFamily: 'inherit' }}
+                          placeholder="Write a comment…"
+                          value={commentInputs[b._id] || ''}
+                          onChange={e => setCommentInputs(p => ({ ...p, [b._id]: e.target.value }))}
+                          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && doAddComment(b._id)}
+                        />
+                        <button className="btn btn-sm btn-primary" onClick={() => doAddComment(b._id)}
+                          disabled={!(commentInputs[b._id] || '').trim()}>Post</button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>}

@@ -1,12 +1,13 @@
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+const censor = require('../utils/censor');
 
 const addComment = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
 
-    if (!content) {
+    if (!content || !content.trim()) {
       return res.status(400).json({ message: 'Comment content is required' });
     }
 
@@ -18,7 +19,7 @@ const addComment = async (req, res, next) => {
     const comment = await Comment.create({
       post: postId,
       author: req.user._id,
-      content,
+      content: censor(content.trim()),
     });
 
     const savedComment = await Comment.findById(comment._id).populate('author', 'name email role');
