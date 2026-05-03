@@ -51,6 +51,21 @@ const calcCompletion = (profile) => {
   return Math.round(checks.filter(Boolean).length / checks.length * 100);
 };
 
+// ── Email format validators ───────────────────────────────
+const STUDENT_EMAIL_RE = /^[a-z]{2}[0-9]{2}[a-z]+[0-9]{3}@mahindrauniversity\.edu\.in$/i;
+const FACULTY_EMAIL_RE = /^[a-z]+\.[a-z]+\.faculty@mahindrauniversity\.edu\.in$/i;
+
+const validateEmail = (email, role) => {
+  if (!email) return '';
+  if (role === 'student' || role === 'alumni') {
+    return STUDENT_EMAIL_RE.test(email) ? '' : 'Format: se23uari096@mahindrauniversity.edu.in';
+  }
+  if (role === 'faculty') {
+    return FACULTY_EMAIL_RE.test(email) ? '' : 'Format: firstname.lastname.faculty@mahindrauniversity.edu.in';
+  }
+  return '';
+};
+
 // ── Branch options ────────────────────────────────────────
 const BRANCHES = [
   'Computer Science Engineering',
@@ -227,7 +242,10 @@ export default function App() {
   };
 
   const doRegister = async (e) => {
-    e.preventDefault(); setLoading(true);
+    e.preventDefault();
+    const emailErr = validateEmail(authForm.email, authForm.role);
+    if (emailErr) { showToast(emailErr, 'error'); return; }
+    setLoading(true);
     try {
       const d = await api('/auth/register', { method: 'POST', body: JSON.stringify(authForm) }, '');
       localStorage.setItem('portal_token', d.token);
@@ -483,7 +501,10 @@ export default function App() {
               </div>
               <div className="field">
                 <label>Email address</label>
-                <input type="email" placeholder="se23uari096@mahindrauniversity.edu.in" required value={authForm.email}
+                <input type="email"
+                  placeholder={authForm.role === 'faculty' ? 'firstname.lastname.faculty@mahindrauniversity.edu.in' : 'se23uari096@mahindrauniversity.edu.in'}
+                  required value={authForm.email}
+                  style={authForm.email && validateEmail(authForm.email, authForm.role) ? { borderColor: 'var(--rose)' } : {}}
                   onChange={e => {
                     const email = e.target.value;
                     const roll = email.split('@')[0] || '';
@@ -493,6 +514,11 @@ export default function App() {
                       rollNumber: (p.role === 'student' || p.role === 'alumni') ? roll : p.rollNumber,
                     }));
                   }} />
+                {authForm.email && validateEmail(authForm.email, authForm.role) && (
+                  <span style={{ fontSize: '.75rem', color: 'var(--rose)', marginTop: '.25rem', display: 'block' }}>
+                    {validateEmail(authForm.email, authForm.role)}
+                  </span>
+                )}
               </div>
               <div className="field">
                 <label>Password</label>

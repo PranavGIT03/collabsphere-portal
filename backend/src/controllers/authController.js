@@ -36,6 +36,17 @@ const register = async (req, res, next) => {
       return res.status(400).json({ message: 'Role must be student, faculty, or alumni' });
     }
 
+    // Email format validation
+    const studentEmailRe = /^[a-z]{2}[0-9]{2}[a-z]+[0-9]{3}@mahindrauniversity\.edu\.in$/i;
+    const facultyEmailRe = /^[a-z]+\.[a-z]+\.faculty@mahindrauniversity\.edu\.in$/i;
+
+    if ((role === 'student' || role === 'alumni') && !studentEmailRe.test(email)) {
+      return res.status(400).json({ message: 'Student email must follow the format: se23uari096@mahindrauniversity.edu.in' });
+    }
+    if (role === 'faculty' && !facultyEmailRe.test(email)) {
+      return res.status(400).json({ message: 'Faculty email must follow the format: firstname.lastname.faculty@mahindrauniversity.edu.in' });
+    }
+
     if (await User.findOne({ email: email.toLowerCase() })) {
       return res.status(409).json({ message: 'Email already registered' });
     }
