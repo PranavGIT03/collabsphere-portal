@@ -566,7 +566,7 @@ export default function App() {
       if (fDept && p.department !== fDept) return false;
       if (search) {
         const q = search.toLowerCase();
-        const hit = [p.title, p.description, p.summary, p.domain, p.department]
+        const hit = [p.title, p.description, p.summary, p.domain, p.department, p.professor?.name]
           .some(f => (f || '').toLowerCase().includes(q));
         if (!hit) return false;
       }
@@ -1021,7 +1021,7 @@ export default function App() {
       <div className="filter-bar">
         <div className="search-input-wrap">
           <span className="search-icon"><Icon name="search" size={15} /></span>
-          <input className="search-input" placeholder="Search by title, description, domain…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="search-input" placeholder="Search by title, professor name, domain…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={fDomain} onChange={e => setFDomain(e.target.value)}>
           <option value="">All domains</option>
