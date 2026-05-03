@@ -14,11 +14,20 @@ const adminRoutes = require('./routes/adminRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
-// Allow all origins in production (frontend served from Vercel CDN or same server)
+// Ensure DB is connected before every API request (critical for serverless cold starts)
+app.use(async (_req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(503).json({ message: 'Database unavailable, please retry' });
+  }
+});
+
+// Allow all origins in production
 app.use(cors({ credentials: true }));
 
 app.use(express.json());
