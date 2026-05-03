@@ -750,8 +750,8 @@ export default function App() {
   ] : [
     { key: 'dashboard',    label: 'Dashboard',     icon: 'dashboard' },
     { key: 'projects',     label: 'Browse Projects', icon: 'projects' },
-    { key: 'applications', label: 'My Applications', icon: 'apps' },
     { key: 'messages',     label: 'Messages',      icon: 'message' },
+    { key: 'applications', label: 'My Applications', icon: 'apps' },
     { key: 'bulletin',     label: 'Bulletin Board', icon: 'bulletin' },
     { key: 'profile',      label: 'My Profile',    icon: 'profile' },
   ];
@@ -1039,7 +1039,7 @@ export default function App() {
                 return sid?.toString() === user?.id?.toString();
               });
               return (
-                <div key={p._id} className="project-card">
+                <div key={p._id} className={`project-card${p.status === 'closed' || p.status === 'archived' ? ' project-card--faded' : ''}`}>
                   <div className="project-card-top">
                     {p.domain && <span className="badge badge-sage">{p.domain}</span>}
                     {p.department && <span className="badge badge-gray">{p.department}</span>}
@@ -1133,19 +1133,13 @@ export default function App() {
 
         {p.attachmentUrl && <><div className="divider" /><a href={p.attachmentUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">Open attachment</a></>}
 
-        {isStudent && (
-          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            {p.status === 'open' && (applied
+        {isStudent && p.status === 'open' && (
+          <div style={{ marginTop: '1.25rem' }}>
+            {applied
               ? <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)', padding: '.75rem 1rem', color: '#15803d', fontWeight: 600, display: 'flex', gap: '.5rem', alignItems: 'center' }}>
                   <Icon name="check" size={16} /> You have already applied to this project
                 </div>
-              : <button className="btn btn-primary" onClick={() => setApplyOpen(true)}>Apply to this project</button>
-            )}
-            {p.professor?._id && accepted && (
-              <button className="btn btn-ghost btn-sm" onClick={() => openChat({ _id: p.professor._id, name: p.professor.name, role: p.professor.role || 'faculty' })}>
-                <Icon name="message" size={14} /> Message professor
-              </button>
-            )}
+              : <button className="btn btn-primary" onClick={() => setApplyOpen(true)}>Apply to this project</button>}
           </div>
         )}
       </div>
@@ -1168,7 +1162,7 @@ export default function App() {
               <thead>
                 <tr>
                   <th>Project</th><th>Faculty</th><th>Domain</th><th>Dept.</th>
-                  <th>CGPA Req.</th><th>Applied On</th><th>Status</th><th>Remarks</th>
+                  <th>CGPA Req.</th><th>Applied On</th><th>Status</th><th>Remarks</th><th></th>
                 </tr>
               </thead>
               <tbody>
@@ -1182,6 +1176,13 @@ export default function App() {
                     <td className="td-muted">{fmtDate(app.createdAt)}</td>
                     <td><span className={`badge ${STATUS_CLS[app.status]}`}>{STATUS_LABEL[app.status]}</span></td>
                     <td className="td-muted">{app.remarks || '—'}</td>
+                    <td>
+                      {app.status === 'accepted' && app.project?.professor?._id && (
+                        <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: app.project.professor._id, name: app.project.professor.name, role: 'faculty' })}>
+                          <Icon name="message" size={13} /> Chat
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
