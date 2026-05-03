@@ -220,6 +220,10 @@ const reviewApplication = async (req, res, next) => {
     const application = project.applications.id(req.params.applicationId);
     if (!application) return res.status(404).json({ message: 'Application not found' });
 
+    if (application.status === 'accepted' || application.status === 'declined') {
+      return res.status(400).json({ message: 'This application has already been finalised and cannot be changed.' });
+    }
+
     const statusMap = { accept: 'accepted', shortlist: 'shortlisted', decline: 'declined' };
     application.status = statusMap[decision] || 'declined';
     if (remarks) application.remarks = remarks;

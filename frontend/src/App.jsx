@@ -1358,15 +1358,17 @@ export default function App() {
                                 <div className="applicant-pitch"><em>"{app.pitch}"</em></div>
                                 {app.remarks && <div style={{ fontSize: '.78rem', color: 'var(--sage)', marginBottom: '.4rem' }}>Faculty note: {app.remarks}</div>}
                                 <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                                  <input placeholder="Add remark (optional)" value={rd.remarks || ''}
-                                    onChange={e => setReviewData(prev => ({ ...prev, [app._id]: { ...prev[app._id], remarks: e.target.value } }))}
-                                    style={{ flex: 1, minWidth: 140, padding: '.38rem .65rem', border: '1px solid var(--border-mid)', borderRadius: 'var(--radius-sm)', fontSize: '.8rem' }} />
-                                  <div className="applicant-actions">
-                                    <button className="btn btn-sm" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }} disabled={loading} onClick={() => doReview(p._id, app._id, 'shortlist')}>Shortlist</button>
-                                    <button className="btn btn-sm btn-sage" disabled={loading} onClick={() => doReview(p._id, app._id, 'accept')}>Select</button>
-                                    <button className="btn btn-sm btn-danger" disabled={loading} onClick={() => doReview(p._id, app._id, 'decline')}>Reject</button>
-                                    {stu._id && app.status === 'accepted' && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
-                                  </div>
+                                  {app.status !== 'accepted' && app.status !== 'declined' && <>
+                                    <input placeholder="Add remark (optional)" value={rd.remarks || ''}
+                                      onChange={e => setReviewData(prev => ({ ...prev, [app._id]: { ...prev[app._id], remarks: e.target.value } }))}
+                                      style={{ flex: 1, minWidth: 140, padding: '.38rem .65rem', border: '1px solid var(--border-mid)', borderRadius: 'var(--radius-sm)', fontSize: '.8rem' }} />
+                                    <div className="applicant-actions">
+                                      <button className="btn btn-sm" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }} disabled={loading} onClick={() => doReview(p._id, app._id, 'shortlist')}>Shortlist</button>
+                                      <button className="btn btn-sm btn-sage" disabled={loading} onClick={() => doReview(p._id, app._id, 'accept')}>Select</button>
+                                      <button className="btn btn-sm btn-danger" disabled={loading} onClick={() => doReview(p._id, app._id, 'decline')}>Reject</button>
+                                    </div>
+                                  </>}
+                                  {stu._id && app.status === 'accepted' && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
                                 </div>
                               </div>
                             );
