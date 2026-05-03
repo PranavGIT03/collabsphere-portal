@@ -602,9 +602,6 @@ export default function App() {
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
-            <div className="auth-dev-note" style={{ marginTop: '1rem' }}>
-              <Icon name="info" size={13} /> Default admin: <strong>admin@portal.com</strong> / <strong>admin123</strong>
-            </div>
           </>}
 
           {authMode === 'register' && <>
