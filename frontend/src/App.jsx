@@ -393,6 +393,7 @@ export default function App() {
     setToken(''); setUser(null); setProfile(null);
     setProjects([]); setBulletins([]); setEvaluations([]);
     setAdminStats(null); setAdminUsers([]);
+    setConversations([]); setChatTarget(null); setChatThread([]); setChatInput(''); setUnreadMsgCount(0);
     setView('dashboard'); setAuthMode('login');
   };
 

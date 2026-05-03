@@ -73,8 +73,16 @@ const sendMessage = async (req, res, next) => {
       return res.status(400).json({ message: 'Message content is required' });
     }
 
-    const recipient = await User.findById(other).select('_id');
+    const recipient = await User.findById(other).select('_id role');
     if (!recipient) return res.status(404).json({ message: 'User not found' });
+
+    const senderRole = req.user.role;
+    const recipientRole = recipient.role;
+    const allowed =
+      (senderRole === 'faculty' && (recipientRole === 'student' || recipientRole === 'alumni')) ||
+      ((senderRole === 'student' || senderRole === 'alumni') && recipientRole === 'faculty') ||
+      senderRole === 'admin' || recipientRole === 'admin';
+    if (!allowed) return res.status(403).json({ message: 'Messaging is only allowed between faculty and students' });
 
     const msg = await Message.create({
       sender: me,
