@@ -26,7 +26,9 @@ const sanitizeUser = (req, user) => ({
   interests: user.interests || [],
   linkedinUrl: user.linkedinUrl || '',
   githubUrl: user.githubUrl || '',
-  resumeUrl: buildFileUrl(req, user.resumePath),
+  resumeUrl: user.resumePath
+    ? (user.resumePath.startsWith('data:') ? user.resumePath : buildFileUrl(req, user.resumePath))
+    : null,
   privateProjects: user.privateProjects || [],
   courseBackground: user.courseBackground || [],
   achievements: user.achievements || [],
@@ -105,10 +107,11 @@ const uploadResume = async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'Resume file is required' });
     const user = await User.findById(req.user._id);
-    user.resumePath = `/uploads/${req.file.filename}`;
+    const dataUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    user.resumePath = dataUrl;
     user.backgroundVerification.resumeVerified = false;
     await user.save();
-    return res.status(200).json({ resumeUrl: buildFileUrl(req, user.resumePath), message: 'Resume uploaded' });
+    return res.status(200).json({ resumeUrl: dataUrl, message: 'Resume uploaded' });
   } catch (error) {
     return next(error);
   }
