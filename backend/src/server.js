@@ -39,13 +39,11 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ── Serve built frontend (local / Render / Railway only) ──
-if (!process.env.VERCEL) {
-  const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
-  if (fs.existsSync(frontendDist)) {
-    app.use(express.static(frontendDist));
-    app.get('/{*path}', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
-  }
+// ── Serve built frontend ──────────────────────────────────
+const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('/{*path}', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
 }
 
 app.use(notFound);
