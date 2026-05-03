@@ -572,7 +572,7 @@ export default function App() {
       <div className="auth-page">
         <div className="auth-card">
           <div className="auth-brand">
-            <div className="auth-brand-mark">CS</div>
+            <img src="/collabsphere.svg" alt="CollabSphere" className="auth-brand-logo" />
             <div className="auth-brand-text">
               CollabSphere
               <small>Faculty · Student · Admin Platform</small>
@@ -1820,7 +1820,7 @@ export default function App() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <img src="/collabsphere.svg" alt="CollabSphere" style={{ width: 36, height: 36, flexShrink: 0 }} />
+          <img src="/collabsphere.svg" alt="CollabSphere" style={{ width: 44, height: 44, flexShrink: 0 }} />
           <div className="sidebar-logo-text">
             CollabSphere
             <small>Campus Platform</small>
@@ -1858,6 +1858,7 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}><Icon name="menu" size={18} /></button>
+            <img src="/collabsphere.svg" alt="CollabSphere" className="topbar-logo" />
             <div>
               <div className="topbar-title">{pageTitle}</div>
               <div className="topbar-subtitle">{user.name} · {ROLE_LABEL[user.role]}</div>
