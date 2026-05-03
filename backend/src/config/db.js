@@ -7,7 +7,11 @@ const connectDB = async () => {
   if (isConnected && mongoose.connection.readyState === 1) return;
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 8000,
+      connectTimeoutMS: 8000,
+      socketTimeoutMS: 30000,
+    });
     isConnected = true;
     console.log('MongoDB connected');
     await seedAdmin();
