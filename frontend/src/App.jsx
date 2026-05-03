@@ -431,6 +431,19 @@ export default function App() {
     finally { setLoading(false); if (resumeRef.current) resumeRef.current.value = ''; }
   };
 
+  const openResume = (url) => {
+    if (!url) return;
+    if (url.startsWith('data:')) {
+      const [header, b64] = url.split(',');
+      const mime = header.match(/:(.*?);/)[1];
+      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: mime });
+      window.open(URL.createObjectURL(blob), '_blank');
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
   // ── Project handlers ──────────────────────────────────────
   const doPostProject = async (e) => {
     e.preventDefault(); setLoading(true);
@@ -1697,10 +1710,14 @@ export default function App() {
             <div className="btn-row">
               <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Saving…' : 'Save profile'}</button>
               {isStudent && <>
-                <label className="btn btn-ghost" style={{ cursor: 'pointer' }}>
-                  Upload resume <input ref={resumeRef} type="file" style={{ display: 'none' }} onChange={doUploadResume} />
-                </label>
-                {profile?.resumeUrl && <a href={profile.resumeUrl} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">View resume</a>}
+                {!profile?.resumeUrl && (
+                  <label className="btn btn-ghost" style={{ cursor: 'pointer' }}>
+                    Upload resume <input ref={resumeRef} type="file" style={{ display: 'none' }} onChange={doUploadResume} />
+                  </label>
+                )}
+                {profile?.resumeUrl && (
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => openResume(profile.resumeUrl)}>View resume</button>
+                )}
               </>}
             </div>
           </div>
@@ -1908,8 +1925,8 @@ export default function App() {
                 </div>
                 <div><span style={{ color: 'var(--text-muted)' }}>Resume: </span>
                   {profile?.resumeUrl
-                    ? <a href={profile.resumeUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--sage)' }}>View ↗</a>
-                    : <span style={{ color: 'var(--rose)' }}>Not set — add in Profile</span>}
+                    ? <button type="button" onClick={() => openResume(profile.resumeUrl)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--sage)', cursor: 'pointer', fontSize: 'inherit' }}>View ↗</button>
+                    : <span style={{ color: 'var(--rose)' }}>Not uploaded yet</span>}
                 </div>
                 <div><span style={{ color: 'var(--text-muted)' }}>LinkedIn: </span>
                   {profile?.linkedinUrl
