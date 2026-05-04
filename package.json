@@ -2,8 +2,8 @@
   "name": "collabsphere",
   "version": "1.0.0",
   "scripts": {
-    "vercel-build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci",
-    "build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci",
+    "vercel-build": "cd frontend && npm ci && npm run build && cd .. && node scripts/copy-frontend-dist.js && cd backend && npm ci",
+    "build": "cd frontend && npm ci && npm run build && cd .. && node scripts/copy-frontend-dist.js && cd backend && npm ci",
     "start": "cd backend && node src/server.js"
   },
   "engines": {
