@@ -1,6 +1,6 @@
 # Working And Running Guide
 
-## 1) What this app does
+# 1) What this app does
 
 This app is a role-based campus portal:
 
@@ -10,7 +10,7 @@ This app is a role-based campus portal:
 - Faculty can delete their own post
 - Any logged-in user can comment on posts
 
-## 2) Tech stack
+# 2) Tech stack
 
 - Frontend: React + Vite
 - Backend: Node.js + Express
@@ -18,7 +18,7 @@ This app is a role-based campus portal:
 - Auth: JWT (`Authorization: Bearer <token>`)
 - Uploads: `multer` (stored in backend `uploads/` folder)
 
-## 3) Project structure
+# 3) Project structure
 
 ```text
 faculty-student-portal/
@@ -36,16 +36,16 @@ faculty-student-portal/
       App.jsx        # main app UI and API calls
 ```
 
-## 4) Prerequisites
+# 4) Prerequisites
 
 - Node.js 18+ (Node 20+ recommended)
 - npm
 - MongoDB Atlas cluster + DB user
 - Atlas Network Access configured to allow your current public IP
 
-## 5) Environment setup
+# 5) Environment setup
 
-### Backend
+## Backend
 
 ```bash
 cd /Users/fci/Documents/faculty-student-portal/backend
@@ -60,7 +60,7 @@ MONGODB_URI=mongodb+srv://<user>:<url-encoded-password>@<cluster-host>/<db>?retr
 JWT_SECRET=<long-random-secret>
 ```
 
-### Frontend
+## Frontend
 
 ```bash
 cd /Users/fci/Documents/faculty-student-portal/frontend
@@ -73,11 +73,11 @@ Set:
 VITE_API_BASE_URL=http://localhost:5001/api
 ```
 
-## 6) How to run
+# 6) How to run
 
 Open two terminals.
 
-### Terminal 1: backend
+## Terminal 1: backend
 
 ```bash
 cd /Users/fci/Documents/faculty-student-portal/backend
@@ -90,7 +90,7 @@ Expected logs:
 - `Server running on port 5001`
 - `MongoDB connected`
 
-### Terminal 2: frontend
+## Terminal 2: frontend
 
 ```bash
 cd /Users/fci/Documents/faculty-student-portal/frontend
@@ -102,9 +102,9 @@ Open:
 
 - `http://localhost:5173`
 
-## 7) How app flow works
+# 7) How app flow works
 
-### Auth flow
+## Auth flow
 
 1. User registers or logs in from frontend.
 2. Backend validates credentials and returns JWT + user data.
@@ -112,7 +112,7 @@ Open:
 4. Frontend sends token in `Authorization` header for protected routes.
 5. Backend middleware verifies token and loads current user.
 
-### Post flow
+## Post flow
 
 1. Faculty submits title/content (and optional image).
 2. Frontend sends `multipart/form-data` for post creation.
@@ -120,7 +120,7 @@ Open:
 4. Backend stores post in MongoDB with `imagePath`.
 5. Post list response includes `imageUrl` for UI display.
 
-### Delete flow
+## Delete flow
 
 Delete image:
 1. Faculty calls `DELETE /api/posts/:postId/image`.
@@ -130,60 +130,60 @@ Delete post:
 1. Faculty calls `DELETE /api/posts/:postId`.
 2. Backend deletes post comments, image file (if any), and post document.
 
-### Comment flow
+## Comment flow
 
 1. User sends comment to `POST /api/posts/:postId/comments`.
 2. Backend creates comment linked to post and author.
 3. Frontend updates comment list.
 
-## 8) API endpoints summary
+# 8) API endpoints summary
 
 Base URL: `http://localhost:5001/api`
 
-### Auth
+## Auth
 
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me` (protected)
 
-### Posts
+## Posts
 
 - `GET /posts` (protected)
 - `POST /posts` (protected, faculty, multipart field name: `image`)
 - `DELETE /posts/:postId` (protected, faculty, own posts only)
 - `DELETE /posts/:postId/image` (protected, faculty, own posts only)
 
-### Comments
+## Comments
 
 - `POST /posts/:postId/comments` (protected)
 
-## 9) Common issues and fixes
+# 9) Common issues and fixes
 
-### `querySrv EBADNAME _mongodb._tcp.<cluster>`
+## `querySrv EBADNAME _mongodb._tcp.<cluster>`
 
 Cause: placeholder URI still in `.env`.
 Fix: replace `<cluster>` and other placeholders with real Atlas values.
 
-### Atlas connection error / whitelist issue
+## Atlas connection error / whitelist issue
 
 Cause: your public IP is not allowed in Atlas Network Access.
 Fix: add your IP in Atlas `Security -> Network Access`.
 
-### 401 unauthorized
+## 401 unauthorized
 
 Cause: missing/expired token.
 Fix: log out and log in again.
 
-### 403 forbidden while deleting post/image
+## 403 forbidden while deleting post/image
 
 Cause: only faculty can delete, and only their own posts can be deleted.
 
-### Upload rejected
+## Upload rejected
 
 Cause: non-image file or size > 5MB.
 Fix: upload an image file under 5MB.
 
-## 10) Security notes
+# 10) Security notes
 
 - Never commit `.env` with real credentials
 - Rotate exposed MongoDB passwords immediately
