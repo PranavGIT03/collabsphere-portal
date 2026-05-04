@@ -1368,6 +1368,7 @@ export default function App() {
                                       <button className="btn btn-sm btn-danger" disabled={loading} onClick={() => doReview(p._id, app._id, 'decline')}>Reject</button>
                                     </div>
                                   </>}
+                                  {stu.resumePath && <button className="btn btn-sm btn-ghost" onClick={() => openResume(stu.resumePath)}>Resume ↗</button>}
                                   {stu._id && app.status === 'accepted' && <button className="btn btn-sm btn-ghost" onClick={() => openChat({ _id: stu._id, name: stu.name || 'Student', role: stu.role || 'student' })}><Icon name="message" size={13} /> Chat</button>}
                                 </div>
                               </div>

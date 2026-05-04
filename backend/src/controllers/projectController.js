@@ -76,7 +76,7 @@ const createProject = async (req, res, next) => {
     const saved = await Project.findById(project._id)
       .populate('professor', 'name role headline department domain position')
       .populate('contributors', 'name role headline skills')
-      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa');
+      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa resumePath linkedinUrl githubUrl');
 
     return res.status(201).json(serializeProject(req, saved.toObject(), req.user));
   } catch (error) {
@@ -101,7 +101,7 @@ const listProjects = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .populate('professor', 'name role headline department domain position')
       .populate('contributors', 'name role headline skills')
-      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa')
+      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa resumePath linkedinUrl githubUrl')
       .lean();
 
     const projectIds = projects.map((p) => p._id);
@@ -132,7 +132,7 @@ const getProjectById = async (req, res, next) => {
     const project = await Project.findById(req.params.projectId)
       .populate('professor', 'name role headline department domain position')
       .populate('contributors', 'name role headline skills')
-      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa');
+      .populate('applications.student', 'name role headline skills rollNumber branch year cgpa resumePath linkedinUrl githubUrl');
 
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
