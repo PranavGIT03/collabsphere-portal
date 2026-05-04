@@ -660,11 +660,11 @@ export default function App() {
               <div className="field">
                 <label>I am a</label>
                 <div className="role-select-row">
-                  {['student', 'faculty', 'alumni'].map(r => (
+                  {['student', 'faculty'].map(r => (
                     <button key={r} type="button" className={`role-btn ${authForm.role === r ? 'selected' : ''}`}
                       onClick={() => setAuthForm(p => ({
                         ...p, role: r,
-                        rollNumber: (r === 'student' || r === 'alumni') ? (p.email.split('@')[0] || '') : '',
+                        rollNumber: r === 'student' ? (p.email.split('@')[0] || '') : '',
                       }))}>
                       {r.charAt(0).toUpperCase() + r.slice(1)}
                     </button>
